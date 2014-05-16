@@ -7,6 +7,7 @@
  */
 
 require('config.php');
+require('utils.php');
 
 $allowed_groupbys = array('live', 'days', 'week', 'month', 'year');
 $groupby = 'live';

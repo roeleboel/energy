@@ -7,7 +7,7 @@
  */
 error_reporting(E_ALL);
 require('config.php');
-//$dbh = new PDO('mysql:host=' . $dbserver . ';dbname=' . $database, $user, $pass);
+require('utils.php');
 
 $mysqli = new mysqli($dbserver, $user, $pass, $database);
 
