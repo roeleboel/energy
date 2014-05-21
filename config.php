@@ -6,8 +6,9 @@
  * Time: 12:00
  */
 
-$dbserver = 'localhost';
+$dbserver = '192.168.62.5';
 $database = 'utilities';
-$user = "root";
-$pass = "";
+$user = "utilities";
+$pass = "utilities";
 
+date_default_timezone_set("Europe/Brussels");

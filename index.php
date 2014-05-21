@@ -7,7 +7,6 @@
  */
 
 require('config.php');
-require('utils.php');
 
 $allowed_groupbys = array('live', 'days', 'week', 'month', 'year');
 $groupby = 'live';
@@ -46,7 +45,8 @@ $no_paging_json_url = 'getjson.php?' . $no_paging_suffix;
 <script type="text/javascript" src="jquery.easyPaginate.js"></script>
 <script>var options = {
         global: {
-            useUTC: false
+            useUTC: true,
+            timezoneOffset: -2 * 60
         },
         tooltip: {
             shared: true,
@@ -150,13 +150,45 @@ $no_paging_json_url = 'getjson.php?' . $no_paging_suffix;
         return jsonUrl;
     }
 
+    function fixData(data_array) {
+        console.log("fixing data");
+        console.log(new Date().getTimezoneOffset());
+
+        var time_offset_to_apply = (new Date().getTimezoneOffset()) * -1 * 60 * 1000;
+
+        // prepare series arrays
+        var used_energy_data_array = [];
+        $.each(data_array, function (key, value) {
+//            console.log(key);
+//            console.log(value);
+//            var timestamp = new Date(value[0]);
+            var timestamp = value[0] + time_offset_to_apply;
+            var energy_value = value[1];
+            var element = [timestamp, energy_value];
+            console.log(timestamp);
+            used_energy_data_array.push(element);
+        });
+        return used_energy_data_array;
+    }
+
     function updateGraph(page) {
 
         options.series = [];
 
         var newJsonUrl = buildJsonUrl(page);
-
+//        console.debug(newJsonUrl);
         $.getJSON(newJsonUrl, function (fulldata) {
+//            console.debug("getting json");
+            var used_energy_data = fixData(fulldata['used_energy']);
+            var generated_energy_data = fixData(fulldata['generated_energy']);
+//
+//            $.each(val, function(key,val) {
+//                var d = val.split(",");
+//                var x = Date.UTC(d[0],d[1],d[2]);
+//                series.data.push([x,d[3]]);
+//            });
+
+
             var energy_type = 'column';
             if (fulldata['settings']['groupby'] == 'live') {
                 energy_type = 'areaspline'
@@ -165,7 +197,7 @@ $no_paging_json_url = 'getjson.php?' . $no_paging_suffix;
 
             options.series.push({
                 name: 'used energy',
-                data: fulldata['used_energy'],
+                data: used_energy_data,
                 yAxis: 0,
                 type: energy_type,
                 tooltip: {
@@ -183,7 +215,7 @@ $no_paging_json_url = 'getjson.php?' . $no_paging_suffix;
             });
             options.series.push({
                 name: 'generated energy',
-                data: fulldata['generated_energy'],
+                data: generated_energy_data,
                 yAxis: 0,
                 type: energy_type, //'column',
                 tooltip: {
@@ -200,42 +232,47 @@ $no_paging_json_url = 'getjson.php?' . $no_paging_suffix;
                 color: '#ccff66'
 
             });
-            options.series.push({
-                name: 'used power',
-                data: fulldata['used_power'],
-                yAxis: 1,
-                type: 'line',
-                tooltip: {
-                    valueSuffix: ' Watt'
-                },
-                marker: {
-                    enabled: false,
-                    states: {
-                        hover: {
-                            enabled: true
+            if (fulldata['settings']['do_power'] == true) {
+                var used_power_data = fixData(fulldata['used_power']);
+                var generated_power_data = fixData(fulldata['generated_power']);
+
+                options.series.push({
+                    name: 'used power',
+                    data: used_power_data,
+                    yAxis: 1,
+                    type: 'line',
+                    tooltip: {
+                        valueSuffix: ' Watt'
+                    },
+                    marker: {
+                        enabled: false,
+                        states: {
+                            hover: {
+                                enabled: true
+                            }
                         }
-                    }
-                },
-                color: '#ff5065'
-            });
-            options.series.push({
-                name: 'generated power',
-                data: fulldata['generated_power'],
-                yAxis: 1,
-                type: 'line',
-                tooltip: {
-                    valueSuffix: ' Watt'
-                },
-                marker: {
-                    enabled: false,
-                    states: {
-                        hover: {
-                            enabled: true
+                    },
+                    color: '#ff5065'
+                });
+                options.series.push({
+                    name: 'generated power',
+                    data: generated_power_data,
+                    yAxis: 1,
+                    type: 'line',
+                    tooltip: {
+                        valueSuffix: ' Watt'
+                    },
+                    marker: {
+                        enabled: false,
+                        states: {
+                            hover: {
+                                enabled: true
+                            }
                         }
-                    }
-                },
-                color: '#339933'
-            });
+                    },
+                    color: '#339933'
+                });
+            }
             var chart = new Highcharts.Chart(options);
 
             if (fulldata['settings']["do_standby_power"]) {
@@ -243,7 +280,7 @@ $no_paging_json_url = 'getjson.php?' . $no_paging_suffix;
                 var st = fulldata['standby_power'];
                 var standby_power_time = new Date(st[0]);
                 var standby_power_usage = st[1];
-                $('#standby_usage').replaceWith("<p id='standby_usage'>Standby power: at " + standby_power_time.format("UTC:dS mmmm HH:MM") + " we used " + standby_power_usage + " watts</p>");
+                $('#standby_usage').replaceWith("<p id='standby_usage'>Standby power: at " + standby_power_time.format("dS mmmm HH:MM") + " we used " + standby_power_usage + " watts</p>");
             }
             if (fulldata['settings']["groupby"] != 'live') {
                 // only show pagination if there is something to paginate...
@@ -288,9 +325,5 @@ $no_paging_json_url = 'getjson.php?' . $no_paging_suffix;
     }
     ?>
 </p>
-
-
 </body>
 </html>
-
-

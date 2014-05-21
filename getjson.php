@@ -16,8 +16,8 @@ $groupby = 'live';
 $do_standby_power = false;
 $do_power = false;
 $periods = 12;
-//$startdate = new DateTime();
-$end_date = DateTime::createFromFormat('Y-m-d', '2014-04-14');
+$end_date = new DateTime();
+//$end_date = DateTime::createFromFormat('Y-m-d', '2014-04-14');
 
 if (isset($_GET['page'])) {
     $page = (int)$_GET['page'];
