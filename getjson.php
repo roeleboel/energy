@@ -123,13 +123,13 @@ if ($groupby == 'live') {
     $sqltotal = '';
     if ($groupby == 'days') {
 //        $sqltotal = "SELECT DATE(`date`) date, MAX(`generated_energy`) generated,MAX(`consumed_energy`) consumed FROM energy WHERE date >= '" . $begin_date . "' AND date < '" . $end_date . "' GROUP BY date";
-        $sqltotal = "SELECT date, `total_generation` generated, `total_consumption` consumed FROM per_diem  WHERE date >= '" . $begin_date . "' AND date < '" . $end_date . "'";
+        $sqltotal = "SELECT date, `total_generation` generated, `total_consumption` consumed FROM per_diem  WHERE date >= '" . $begin_date . "' AND date <= '" . $end_date . "'";
     } elseif ($groupby == 'week') {
         $sqltotal = "SELECT min(`date`) date, SUM(`total_generation`) generated,SUM(`total_consumption`) consumed FROM per_diem  WHERE weeknumber >= '" . $begin_date . "' AND weeknumber <= '" . $end_date . "' GROUP BY weeknumber";
     } elseif ($groupby == 'month') {
-        $sqltotal = "SELECT concat(year, '-', month, '-01') date, SUM(`total_generation`) generated,SUM(`total_consumption`) consumed FROM per_diem  WHERE date >= '" . $begin_date . "' AND date < '" . $end_date . "' GROUP BY year,month";
+        $sqltotal = "SELECT concat(year, '-', month, '-01') date, SUM(`total_generation`) generated,SUM(`total_consumption`) consumed FROM per_diem  WHERE date >= '" . $begin_date . "' AND date <= '" . $end_date . "' GROUP BY year,month";
     } elseif ($groupby == 'year') {
-        $sqltotal = "SELECT concat(year,'-01-01') date, SUM(`total_generation`) generated,SUM(`total_consumption`) consumed FROM per_diem  WHERE date >= '" . $begin_date . "' AND date < '" . $end_date . "' GROUP BY year";
+        $sqltotal = "SELECT concat(year,'-01-01') date, SUM(`total_generation`) generated,SUM(`total_consumption`) consumed FROM per_diem  WHERE date >= '" . $begin_date . "' AND date <= '" . $end_date . "' GROUP BY year";
     }
 
 //    echo $sqltotal."<br>";
