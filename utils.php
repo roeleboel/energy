@@ -17,7 +17,7 @@ function setRelevantDates($groupby, $periods, $enddate)
 {
     $result = array();
     $date = DateTime::createFromFormat('Y-m-d', $enddate);
-    $periods--;
+//    $periods--;
 //    echo $groupby."<br>".$periods."<br>".$enddate."<br>";
 
     switch ($groupby) {

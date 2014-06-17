@@ -94,3 +94,4 @@ function saveToPerDiem($input, $dbconnection)
             $mysqli->close();
         }
     }
+}
