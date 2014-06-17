@@ -9,7 +9,8 @@ error_reporting(E_ALL);
 require('config.php');
 require('utils.php');
 
-$mysqli = new mysqli($dbserver, $user, $pass, $database);
+//$mysqli = new mysqli($dbserver, $user, $pass, $database);
+$db_connection = new PDO("pgsql:host=$dbserver;port=5432;dbname=$database;user=$user;password=$pass");
 
 $page = 1;
 $groupby = 'live';
@@ -34,24 +35,24 @@ $end_date = $end_date->format('Y-m-d');
 
 switch ($groupby) {
     case "year":
-        $new_dates = setRelevantDates($groupby, $periods, $end_date);
+        $new_dates = setRelevantDates($groupby, $periods, $end_date, $page);
         $begin_date = $new_dates['begin_date'];
         $end_date = $new_dates['end_date'];
         break;
     case "month":
-        $new_dates = setRelevantDates($groupby, $periods, $end_date);
+        $new_dates = setRelevantDates($groupby, $periods, $end_date, $page);
         $begin_date = $new_dates['begin_date'];
         $end_date = $new_dates['end_date'];
         break;
     case "week":
-        $new_dates = setRelevantDates($groupby, $periods, $end_date);
+        $new_dates = setRelevantDates($groupby, $periods, $end_date, $page);
         $begin_date = $new_dates['begin_date'];
         $end_date = $new_dates['end_date'];
         break;
     case "days":
         $do_standby_power = true;
         $periods = 40;
-        $new_dates = setRelevantDates($groupby, $periods, $end_date);
+        $new_dates = setRelevantDates($groupby, $periods, $end_date, $page);
         $begin_date = $new_dates['begin_date'];
         $end_date = $new_dates['end_date'];
         break;
@@ -61,14 +62,19 @@ switch ($groupby) {
         $do_standby_power = true;
         $do_power = true;
         $periods = 1;
-        $new_dates = setRelevantDates($groupby, $periods, $end_date);
+        $new_dates = setRelevantDates($groupby, $periods, $end_date, $page);
         $begin_date = $new_dates['begin_date'];
         $end_date = $new_dates['end_date'];
 //        echo "$begin_date - $end_date<br>";
 }
 
-$limit_start = ($page - 1) * $periods;
-$limit_end = $page * $periods;
+// mysql variant
+//$limit_start = ($page - 1) * $periods;
+//$limit_end = $page * $periods;
+// postgres variant
+$limit_start = ($page - 1) * $periods; // OFFSET
+$limit_end = $periods; // LIMIT
+
 
 $masterarray = array();
 $gen_ener_array = array();
@@ -88,8 +94,8 @@ $result_settings['results_per_page'] = $periods;
 if ($do_standby_power) {
     $standby_power = null;
 
-    $result = $mysqli->query("SELECT date, consumed_power FROM energy WHERE date >= '" . $begin_date . "' AND date < '" . $end_date . "'  ORDER BY `consumed_power` ASC LIMIT 1");
-    while ($row = $result->fetch_assoc()) {
+    $result = $db_connection->query("SELECT date, consumed_power FROM energy WHERE date >= '" . $begin_date . "' AND date < '" . $end_date . "'  ORDER BY consumed_power ASC LIMIT 1");
+    while ($row = $result->fetch()) {
         $date = strtotime($row['date']) * 1000;
         $standby_power = array($date, (float)$row['consumed_power']);
     }
@@ -102,8 +108,8 @@ if ($groupby == 'live') {
         $used_pow_array = array();
     }
 
-    $result = $mysqli->query("SELECT date, generated_energy, generated_power,consumed_energy, consumed_power FROM energy WHERE date >= '" . $begin_date . "' AND date < '" . $end_date . "' ORDER BY date ASC");
-    while ($row = $result->fetch_assoc()) {
+    $result = $db_connection->query("SELECT date, generated_energy, generated_power,consumed_energy, consumed_power FROM energy WHERE date >= '" . $begin_date . "' AND date < '" . $end_date . "' ORDER BY date ASC");
+    while ($row = $result->fetch()) {
         $date = strtotime($row['date']) * 1000;
         array_push($gen_ener_array, array($date, (float)$row['generated_energy']/1000));
         array_push($used_ener_array, array($date, (float)$row['consumed_energy']/1000));
@@ -122,25 +128,32 @@ if ($groupby == 'live') {
     $sql = '';
     $sqltotal = '';
     if ($groupby == 'days') {
-//        $sqltotal = "SELECT DATE(`date`) date, MAX(`generated_energy`) generated,MAX(`consumed_energy`) consumed FROM energy WHERE date >= '" . $begin_date . "' AND date < '" . $end_date . "' GROUP BY date";
-        $sqltotal = "SELECT date, `total_generation` generated, `total_consumption` consumed FROM per_diem  WHERE date > '" . $begin_date . "' AND date <= '" . $end_date . "'";
+        $sql = "SELECT date, total_generation AS generated, total_consumption AS consumed FROM per_diem  WHERE date >= '" . $begin_date . "' AND date <= '" . $end_date . "'"; //. " OFFSET " . $limit_start . " LIMIT " . $limit_end;;
+        $sqltotal = "SELECT date, total_generation AS generated, total_consumption AS consumed FROM per_diem";
     } elseif ($groupby == 'week') {
-        $sqltotal = "SELECT min(`date`) date, SUM(`total_generation`) generated,SUM(`total_consumption`) consumed FROM per_diem  WHERE weeknumber > '" . $begin_date . "' AND weeknumber <= '" . $end_date . "' GROUP BY weeknumber";
+        $sql = "SELECT min(date) AS date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem  WHERE weeknumber >= " . $begin_date . " AND weeknumber <= " . $end_date . " GROUP BY weeknumber"; //. " OFFSET " . $limit_start . " LIMIT " . $limit_end;
+        $sqltotal = "SELECT min(date) AS date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem GROUP BY weeknumber";
     } elseif ($groupby == 'month') {
-        $sqltotal = "SELECT concat(year, '-', month, '-01') date, SUM(`total_generation`) generated,SUM(`total_consumption`) consumed FROM per_diem  WHERE date > '" . $begin_date . "' AND date <= '" . $end_date . "' GROUP BY year,month";
+        $sql = "SELECT concat(year, '-', month, '-01') date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem  WHERE date >= '" . $begin_date . "' AND date <= '" . $end_date . "' GROUP BY year,month"; //. " OFFSET " . $limit_start . " LIMIT " . $limit_end;
+        $sqltotal = "SELECT concat(year, '-', month, '-01') date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem GROUP BY year,month";
     } elseif ($groupby == 'year') {
-        $sqltotal = "SELECT concat(year,'-01-01') date, SUM(`total_generation`) generated,SUM(`total_consumption`) consumed FROM per_diem  WHERE date > '" . $begin_date . "' AND date <= '" . $end_date . "' GROUP BY year";
+        $sql = "SELECT concat(year,'-01-01') date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem  WHERE date >= '" . $begin_date . "' AND date <= '" . $end_date . "' GROUP BY year"; //. " OFFSET " . $limit_start . " LIMIT " . $limit_end;
+        $sqltotal = "SELECT concat(year,'-01-01') date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem  GROUP BY year";
     }
 
 //    echo $sqltotal."<br>";
     //  get totals
-    $result = $mysqli->query($sqltotal);
-    $result_settings['total_results'] = mysqli_num_rows($result);
+    $result = $db_connection->query($sqltotal);
+    $counter = 0;
+    foreach ($result as $row) {
+        $counter++;
+    }
+    $result_settings['total_results'] = $counter;
 
-    $sql = $sqltotal . " LIMIT " . $limit_start . ", " . $limit_end;
+//    $sql = $sqltotal . " OFFSET " . $limit_start . " LIMIT " . $limit_end;
     // get actual results
-    $result = $mysqli->query($sql);
-    while ($row = $result->fetch_assoc()) {
+    $result = $db_connection->query($sql);
+    while ($row = $result->fetch()) {
         $date = strtotime($row['date']) * 1000;
         array_push($gen_ener_array, array($date, (float)$row['generated']/1000));
         array_push($used_ener_array, array($date, (float)$row['consumed']/1000));
