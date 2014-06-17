@@ -294,7 +294,7 @@ function buildJsonUrl(page) {
 </head>
 <body>
 
-<div id="container" style='padding-top:5px;margin-bottom:4px;width:950px;height:375px'></div>
+<div id="container" style='padding-top:5px;margin-bottom:4px;width:950px;height:500px'></div>
 
 <div id="pagedisp"></div>
 <div id="pagination" style='padding-top:5px;margin-bottom:4px;width:950px;text-align: center'></div>
