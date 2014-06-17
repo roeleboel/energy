@@ -128,16 +128,16 @@ if ($groupby == 'live') {
     $sql = '';
     $sqltotal = '';
     if ($groupby == 'days') {
-        $sql = "SELECT date, total_generation AS generated, total_consumption AS consumed FROM per_diem  WHERE date >= '" . $begin_date . "' AND date <= '" . $end_date . "'"; //. " OFFSET " . $limit_start . " LIMIT " . $limit_end;;
+        $sql = "SELECT date, total_generation AS generated, total_consumption AS consumed FROM per_diem  WHERE date > '" . $begin_date . "' AND date <= '" . $end_date . "'"; //. " OFFSET " . $limit_start . " LIMIT " . $limit_end;;
         $sqltotal = "SELECT date, total_generation AS generated, total_consumption AS consumed FROM per_diem";
     } elseif ($groupby == 'week') {
-        $sql = "SELECT min(date) AS date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem  WHERE weeknumber >= " . $begin_date . " AND weeknumber <= " . $end_date . " GROUP BY weeknumber"; //. " OFFSET " . $limit_start . " LIMIT " . $limit_end;
+        $sql = "SELECT min(date) AS date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem  WHERE weeknumber > " . $begin_date . " AND weeknumber <= " . $end_date . " GROUP BY weeknumber"; //. " OFFSET " . $limit_start . " LIMIT " . $limit_end;
         $sqltotal = "SELECT min(date) AS date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem GROUP BY weeknumber";
     } elseif ($groupby == 'month') {
-        $sql = "SELECT concat(year, '-', month, '-01') date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem  WHERE date >= '" . $begin_date . "' AND date <= '" . $end_date . "' GROUP BY year,month"; //. " OFFSET " . $limit_start . " LIMIT " . $limit_end;
+        $sql = "SELECT concat(year, '-', month, '-01') date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem  WHERE date > '" . $begin_date . "' AND date <= '" . $end_date . "' GROUP BY year,month"; //. " OFFSET " . $limit_start . " LIMIT " . $limit_end;
         $sqltotal = "SELECT concat(year, '-', month, '-01') date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem GROUP BY year,month";
     } elseif ($groupby == 'year') {
-        $sql = "SELECT concat(year,'-01-01') date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem  WHERE date >= '" . $begin_date . "' AND date <= '" . $end_date . "' GROUP BY year"; //. " OFFSET " . $limit_start . " LIMIT " . $limit_end;
+        $sql = "SELECT concat(year,'-01-01') date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem  WHERE date > '" . $begin_date . "' AND date <= '" . $end_date . "' GROUP BY year"; //. " OFFSET " . $limit_start . " LIMIT " . $limit_end;
         $sqltotal = "SELECT concat(year,'-01-01') date, SUM(total_generation) AS generated,SUM(total_consumption) AS consumed FROM per_diem  GROUP BY year";
     }
 

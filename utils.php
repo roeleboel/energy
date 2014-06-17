@@ -17,7 +17,7 @@ function setRelevantDates($groupby, $periods, $enddate, $pageoffset)
 {
     $result = array();
     $date = DateTime::createFromFormat('Y-m-d', $enddate);
-    $begindate_offset = ($pageoffset * $periods) - 1;
+    $begindate_offset = ($pageoffset * $periods);
     $enddate_offset = $periods;
 //    if($pageoffset>1){
 //        $enddate_offset = ($pageoffset-1) * $periods;
