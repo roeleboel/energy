@@ -119,8 +119,15 @@ if ($groupby == 'live') {
         }
     }
     if ($do_power) {
-        $max_power_used = max($used_pow_array);
-        $max_power_generated = max($gen_pow_array);
+        $max_power_used = 0;
+        foreach ($used_pow_array as $key => $val) {
+            $max_power_used = max($max_power_used, $val);
+        }
+
+        $max_power_generated = 0;
+        foreach ($gen_pow_array as $key => $val) {
+            $max_power_generated = max($max_power_generated, $val);
+        }
         $max_power = max($max_power_used, $max_power_generated);
 
         $masterarray['generated_power'] = $gen_pow_array;
