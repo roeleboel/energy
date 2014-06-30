@@ -259,9 +259,11 @@ function buildJsonUrl(page) {
                     },
                     color: '#339933'
                 });
-                chart.yAxis[1].update({ max: 100 });
             }
             var chart = new Highcharts.Chart(options);
+            if (fulldata['settings']['do_power'] == true) {
+                chart.yAxis[1].update({ max: max_power });
+            }
 
             if (fulldata['settings']["do_standby_power"]) {
                 // standby usage
