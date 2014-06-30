@@ -120,13 +120,13 @@ if ($groupby == 'live') {
     }
     if ($do_power) {
         $max_power_used = 0;
-        foreach ($used_pow_array as $key => $val) {
-            $max_power_used = max($max_power_used, $val);
+        foreach ($used_pow_array as $val) {
+            $max_power_used = max($max_power_used, $val[1]);
         }
 
         $max_power_generated = 0;
-        foreach ($gen_pow_array as $key => $val) {
-            $max_power_generated = max($max_power_generated, $val);
+        foreach ($gen_pow_array as $val) {
+            $max_power_generated = max($max_power_generated, $val[1]);
         }
         $max_power = max($max_power_used, $max_power_generated);
 
