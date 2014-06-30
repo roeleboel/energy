@@ -119,8 +119,13 @@ if ($groupby == 'live') {
         }
     }
     if ($do_power) {
+        $max_power_used = max($used_pow_array);
+        $max_power_generated = max($gen_pow_array);
+        $max_power = max($max_power_used, $max_power_generated);
+
         $masterarray['generated_power'] = $gen_pow_array;
         $masterarray['used_power'] = $used_pow_array;
+        $masterarray['max_power'] = $max_power;
     }
     $result_settings['total_results'] = 1;
 } else {

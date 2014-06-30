@@ -90,7 +90,8 @@ $no_paging_json_url = $jsonurl; // 'getjson.php?' .$no_paging_suffix;
             }
         },
         chart: {
-            renderTo: 'container'
+            renderTo: 'container',
+            alignTicks: false
         },
         title: {text: 'Energy monitoring of hg38'},
         plotOptions: {
@@ -220,6 +221,7 @@ function buildJsonUrl(page) {
             if (fulldata['settings']['do_power'] == true) {
                 var used_power_data = fixData(fulldata['used_power']);
                 var generated_power_data = fixData(fulldata['generated_power']);
+                var max_power = fulldata['max_power'];
 
                 options.series.push({
                     name: 'used power',
@@ -257,6 +259,7 @@ function buildJsonUrl(page) {
                     },
                     color: '#339933'
                 });
+                chart.yAxis[1].update({ max: 100 });
             }
             var chart = new Highcharts.Chart(options);
 
