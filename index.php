@@ -221,7 +221,7 @@ function buildJsonUrl(page) {
             if (fulldata['settings']['do_power'] == true) {
                 var used_power_data = fixData(fulldata['used_power']);
                 var generated_power_data = fixData(fulldata['generated_power']);
-                var max_power = fulldata['max_power'];
+                var max_power = (Math.ceil(fulldata['max_power'] + 100 / 500)) * 500;
 
                 options.series.push({
                     name: 'used power',
