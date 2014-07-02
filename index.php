@@ -90,8 +90,8 @@ $no_paging_json_url = $jsonurl; // 'getjson.php?' .$no_paging_suffix;
             }
         },
         chart: {
-            renderTo: 'container',
-            alignTicks: false
+            renderTo: 'container'
+//            alignTicks: false
         },
         title: {text: 'Energy monitoring of hg38'},
         plotOptions: {
