@@ -94,12 +94,22 @@ $result_settings['results_per_page'] = $periods;
 if ($do_standby_power) {
     $standby_power = null;
 
+    // $standby_power
     $result = $db_connection->query("SELECT date, consumed_power FROM energy WHERE date >= '" . $begin_date . "' AND date < '" . $end_date . "'  ORDER BY consumed_power ASC LIMIT 1");
     while ($row = $result->fetch()) {
         $date = strtotime($row['date']) * 1000;
         $standby_power = array($date, (float)$row['consumed_power']);
     }
     $masterarray['standby_power'] = $standby_power;
+
+    // max_power_usage
+    $result = $db_connection->query("SELECT date, consumed_power FROM energy WHERE date >= '" . $begin_date . "' AND date < '" . $end_date . "'  ORDER BY consumed_power DESC LIMIT 1");
+    while ($row = $result->fetch()) {
+        $date = strtotime($row['date']) * 1000;
+        $max_power_usage = array($date, (float)$row['consumed_power']);
+    }
+    $masterarray['max_power_usage'] = $max_power_usage;
+
 }
 
 if ($groupby == 'live') {
