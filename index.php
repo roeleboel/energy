@@ -302,7 +302,7 @@ if ($groupby == "live") {
     if ($tomorrow <= new DateTime()) {
         $linkparts['date'] = $tomorrow->format("Y-m-d");
         $query_result = http_build_query($linkparts);
-        echo '<a href=\'' . $_SERVER['PHP_SELF'] . '?' . $query_result . '\'>Next day</a>';
+        echo ' <a href=\'' . $_SERVER['PHP_SELF'] . '?' . $query_result . '\'>Next day</a>';
     }
 }
 ?>");
