@@ -321,8 +321,10 @@ $(document).ready(function () {
 // only show date-selector if we are in live view
 if ($groupby == "live") {
     // get the day before and after
-    $yesterday = $date->sub(new DateInterval('P1D'));
-    $tomorrow = $date->add(new DateInterval('P1D'));
+    $yesterday = $date;
+    $yesterday->sub(new DateInterval('P1D'));
+    $tomorrow = $date;
+    $tomorrow->add(new DateInterval('P1D'));
 
     // build the links
     $linkparts = $_GET;
