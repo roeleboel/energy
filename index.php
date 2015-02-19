@@ -281,7 +281,7 @@ function updateGraph(page) {
             var max_power_usage_time = new Date(st[0]);
             var max_power_usage_usage = st[1];
 
-            $('#standby_usage').text("Power: at " + standby_power_time.format("dS mmmm HH:MM") + " we used " + standby_power_usage + " watts, while at " + max_power_usage_time.format("dS mmmm HH:MM") + " we used " + max_power_usage_usage + " watts<br><?php
+            $('#standby_usage').html("Power: at " + standby_power_time.format("dS mmmm HH:MM") + " we used " + standby_power_usage + " watts, while at " + max_power_usage_time.format("dS mmmm HH:MM") + " we used " + max_power_usage_usage + " watts<br><?php
 // only show date-selector if we are in live view
 if ($groupby == "live") {
     // get the day before and after
