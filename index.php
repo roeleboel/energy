@@ -82,12 +82,13 @@ var options = {
     xAxis: {
         type: 'datetime',
         dateTimeLabelFormats: { // don't display the dummy year
+            millisecond: '%Y', // we need this to display years when there is only 1 year in the graph
             minute: '%e. %b<br>%H:%M',
             hour: '%e. %b<br>%H:%M',
             day: '%e. %b',
-            week: '%e. %b',
-            month: '%e. %b',
-            year: '%b'
+            week: '%e %b',
+            month: '%b %Y',
+            year: '%Y'
         }
     },
     chart: {
