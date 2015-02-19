@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: rpaesen
- * Date: 24/04/14
- * Time: 14:32
- */
 
 require('config.php');
 
@@ -23,9 +17,11 @@ if (isset($_GET['groupby'])) {
     $groupby = in_array($_GET['groupby'], $allowed_groupbys) ? $_GET['groupby'] : 'live';
     $no_paging_suffix['groupby'] = $_GET['groupby'];
 }
+$date = new DateTime();
 if (isset($_GET['date'])) {
     $jsonurl .= '&date=' . $_GET['date'];
     $no_paging_suffix['date'] = $_GET['date'];
+    $date = DateTime::createFromFormat('Y-m-d', $_GET['date']);
 }
 //$no_paging_url = 'index.php?' . $no_paging_suffix;
 $no_paging_json_url = $jsonurl; // 'getjson.php?' .$no_paging_suffix;
@@ -320,6 +316,28 @@ $(document).ready(function () {
 <div id="pagination" style='padding-top:5px;margin-bottom:4px;width:950px;text-align: center'></div>
 
 <div id='standby_usage' style='padding-top:5px;margin-bottom:4px;width:950px;text-align: center'></div>
+
+<?php
+// only show date-selector if we are in live view
+if ($groupby == "live") {
+    // get the day before and after
+    $yesterday = $date->sub(new DateInterval('P1D'));
+    $tomorrow = $date->add(new DateInterval('P1D'));
+
+    // build the links
+    $linkparts = $_GET;
+    $linkparts['date'] = $yesterday->format("Y-m-d");
+    $query_result = http_build_query($linkparts);
+    echo '<a href="' . $_SERVER['PHP_SELF'] . '?' . $query_result . '">Prev day</a>';
+
+    // will we show tomorow?
+    if ($tomorrow <= new DateTime()) {
+        $linkparts['date'] = $tomorrow->format("Y-m-d");
+        $query_result = http_build_query($linkparts);
+        echo '<a href="' . $_SERVER['PHP_SELF'] . '?' . $query_result . '">Next day</a>';
+    }
+}
+?>
 
 <div id="groupby_selector" style='padding-top:5px;margin-bottom:4px;width:950px;text-align: center'>
     <i>Group by: </i>
